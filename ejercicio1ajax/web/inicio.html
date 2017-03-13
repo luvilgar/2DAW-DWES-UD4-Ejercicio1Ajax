@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<script language="javascript">
+	var xmlhttp;
+	function busqueda(evento) {
+	//Comprueba si es un carácter alfanumérico
+	    if((evento.keyCode>=48 && evento.keyCode<=57) ||
+              (evento.keyCode>=65 && evento.keyCode<=90)){
+               if(window.ActiveXObject){
+                   xmlhttp=new ActiveXObject("Microsoft.XMLHttp");      
+               }
+               else if((window.XMLHttpRequest) || (typeof XMLHttpRequest)!=undefined){
+                   xmlhttp=new XMLHttpRequest();
+               }
+               else{
+                   alert("Su navegador no tiene soporte para AJAX");
+                   return;
+               }
+               localizaPalabra();
+        }
+
+   	} 
+   	
+   	 /* Funcion para localizar el titulo de la pelicula en BD a partir de las letras tecleadas por el usuario. 
+   	    recupera la información introducida en el cuadro de texto y se la manda al servlet que la procesará para  
+   	    aportar una posible sugerencia. */
+     function localizaPalabra(){
+            var caja=document.getElementById("texto");
+            var texto=caja.value;
+            xmlhttp.open("POST","controlador",true);
+            xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xmlhttp.onreadystatechange=procesadatos;
+            xmlhttp.send("texto="+encodeURIComponent(texto));    
+    } 
+
+    /* Esta función se encarga de presentar, si existe en la BD, una respuesta que coincida con las letras 
+       tecleadas por el usuario marcando aquellas que no han sido escritas por el mismo. */ 
+    function procesadatos(){         
+       if(xmlhttp.readyState==4){
+           var resp=xmlhttp.responseText;   
+           var caja=document.getElementById("texto");
+           if(resp!=""){                    
+               var inicioSel=caja.value.length;
+               caja.value=resp;
+               caja.selectionStart=inicioSel;
+               caja.selectionEnd=caja.value.length;
+           }
+       }
+    } 
+
+    /* Función que se activa cuando se pulsa el boton mostrar para que se muestren los datos de una pelicula */
+    function mostrar(){
+        var caja=document.getElementById("texto");
+        var texto=caja.value;
+        xmlhttp.open("POST","Mostrar",true);
+        xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xmlhttp.onreadystatechange=mostrarDatos;
+        xmlhttp.send("texto="+encodeURIComponent(texto)); 
+        // Ponemos invisibles el botón y la imagen 
+        document.getElementById("verFotograma").style.display="none"; 
+        document.getElementById("fotograma").style.display="none";
+	} 
+
+	// Funcion para mostrar en una tabla los datos de la pelicula elegida  
+	function mostrarDatos(){         
+    	if(xmlhttp.readyState==4){
+			var respuesta = xmlhttp.responseXML;
+			var pelicula = respuesta.getElementsByTagName("pelicula").item(0);
+			/* Recupera los elementos (hijo) que forman el documento pelicula */ 
+			var elementos = pelicula.childNodes;
+			var textoHTML = "<table border='1' >";
+			textoHTML+="<tr>";
+			/* Crea la fila con los nombres de los campos */
+			for (var i=0; i<elementos.length;i++)
+			{
+				textoHTML+="<th>"+elementos.item(i).nodeName+"</th>";
+			}
+			textoHTML+="</tr>";
+			/* Genera la fila con los datos de la pelicula */
+			textoHTML+="<tr>";
+			for (var i=0;i<elementos.length;i++)
+			{
+				textoHTML+="<td>"+elementos.item(i).firstChild.nodeValue+"</td>";
+			}
+			textoHTML+="</tr></table>";
+			document.getElementById("dato").innerHTML=textoHTML;
+        	document.getElementById("verFotograma").style.display="inline";
+    	}
+	}  
+
+	/* Funcion que muestra la imagen del fotograma una vez pulsado el boton verFotograma */
+	function ver(){
+  		if(xmlhttp.readyState==4){
+			var respuesta = xmlhttp.responseXML;
+			var pelicula = respuesta.getElementsByTagName("pelicula").item(0);
+			var elementos = pelicula.childNodes;
+			var imagen=elementos.item(4).firstChild.nodeValue;
+
+        	document.getElementById("fotograma").style.display="inline";
+			document.getElementById("fotograma").src="fotogramas/"+imagen;
+  		}
+	} 
+
+</script>
+<title>Ejemplo de autosugerencias con Ajax</title>
+<style type="text/css">
+body{ text-align: center;}
+#dato{ margin:0 auto; }
+#dato table{ margin:0 auto; }
+</style>
+</head>
+<body>
+	Introduzca título de la película:<input type="text" id="texto" name="texto" required onkeyup="busqueda(event)">
+	<button id="mostrar" name="mostrar" onclick="mostrar()">Mostrar</button><br>
+	<br>
+	<div id="dato"></div><br>
+	<button id="verFotograma" name="verFotograma" style="display: none" onclick="ver()">VerFotograma</button>
+	<br><br>
+	<img id="fotograma" src="" style="display: none" alt="No se encuentra el archivo"	width="300p" /><br>
+</body>
+</html>

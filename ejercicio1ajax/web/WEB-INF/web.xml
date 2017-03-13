@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>ejercicio1ajax</display-name>
+  <context-param>
+    <description>Datasource para la conexión con la base de datos bdfotogramas</description>
+    <param-name>ds</param-name>
+    <param-value>java:jboss/datasources/dsbdfotogramas</param-value>
+  </context-param>
+  <servlet>
+    <description>Servlet principal de la aplicación</description>
+    <display-name>Controlador</display-name>
+    <servlet-name>Controlador</servlet-name>
+    <servlet-class>ajax.servlet.Controlador</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Controlador</servlet-name>
+    <url-pattern>/controlador</url-pattern>
+  </servlet-mapping>
+   <servlet>
+    <description>Servlet para mostrar los datos de un fotograma</description>
+    <display-name>Mostrar</display-name>
+    <servlet-name>Mostrar</servlet-name>
+    <servlet-class>ajax.servlet.Mostrar</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Mostrar</servlet-name>
+    <url-pattern>/Mostrar</url-pattern>
+  </servlet-mapping>
+  <welcome-file-list>
+    <welcome-file>inicio.html</welcome-file>
+  </welcome-file-list>
+  <login-config>
+    <auth-method>BASIC</auth-method>
+  </login-config>
+</web-app>
